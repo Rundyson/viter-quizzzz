@@ -21,6 +21,13 @@ export const setError = (val) => {
     };
     };
 
+    export const setName = (val) => {
+    return {
+        type: "NAME",
+        payload: val,
+    };
+    };
+
 
     export const setValidate = (val) => {
     return {

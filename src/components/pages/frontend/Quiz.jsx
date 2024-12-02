@@ -1,22 +1,37 @@
+import useQueryData from '@/components/custom-hook/useQueryData';
+import { StoreContext } from '@/components/store/storeContext';
 import { questions } from '@/Questions';
 import React from 'react'
 
 
 const Quiz = () => {
+  const {store, dispatch} = React.useContext(StoreContext);
   const [isShowSummary, setIsShowSummary] = React.useState(false);
   const [currentQuestion, setCurrentQuestion] = React.useState(0);
   const [isActive, setIsActive] = React.useState(null);
   const [selectedAnswer, setSelectedAnswer] = React.useState(null);
   const [counterCorrect, setCounterCorrrect] = React.useState(0);
-  const [randomize, setRandomize] = React.useState(0);
+  const [randmozie, setRandomize] = React.useState(0);
+
+  const {
+    isLoading,
+    isFetching,
+    error,
+    data: result,
+  } = useQueryData(
+    `/v2/question`, // endpoint
+    "get", // method
+    "question"
+  );
+console.log(store.name);
 
   const handleNextQuestion = () => {
     setIsActive(null);
     setCurrentQuestion((prev) => prev + 1);
-    if(currentQuestion === questions.length -1) {
+    if(currentQuestion === result?.data.length -1) {
       setIsShowSummary(true);
     }
-    if(selectedAnswer.isCorrect === true){
+    if(selectedAnswer.isCorrect === "true"){
       setCounterCorrrect((prev) => prev + 1)
     }
     
@@ -37,19 +52,22 @@ const Quiz = () => {
       .map(({ value }) => value))
   };
   
-  React.useEffect(()=>{
-    setRandomize (questions
-      .map(value => ({ value, sort: Math.random() }))
-      .sort((a, b) => a.sort - b.sort)
-      .map(({ value }) => value));
-  },[]);
+  // React.useEffect(()=>{
+  //   !isLoading && 
+  //   setresult?.data (
+  //     result?.data
+  //     .map(value => ({ value, sort: Math.random() }))
+  //     .sort((a, b) => a.sort - b.sort)
+  //     .map(({ value }) => value));
+  // },[]);
+
 
   return (
 
     <>
       <header className='p-4 flex gap-4 bg-gray-400'>
 
-      {Array.from(Array(questions.length).keys()).map((i) => (
+      {Array.from(Array(result?.data.length).keys()).map((i) => (
           <span className={`${i <= currentQuestion ? "bg-blue-800" : "bg-blue-400"} h-2  w-full rounded-md`} key={i} ></span>
         ))}
 
@@ -61,21 +79,23 @@ const Quiz = () => {
         {isShowSummary ? 
         (<div className="summary">
 
-          {counterCorrect / questions.length * 100 >= 60 ? 
+          {counterCorrect / result?.data.length * 100 >= 60 ? 
           (<div className="passed text-center">
             <h2 className='text-2xl font-bold'>Congratulations!</h2>
+            <h1>{store.name}</h1>
             <h3 className='text-4xl mb-3'>
-              <span className='text-xl text-green-400'>You Passed the Quiz</span> <br /> {Math.round((counterCorrect / questions.length) * 100)}%
+              <span className='text-xl text-green-400'>You Passed the Quiz</span> <br /> {Math.round((counterCorrect / result?.data.length) * 100)}%
               </h3>
-            <p className="mb-2">{counterCorrect} / {questions.length} correct answers</p>
+            <p className="mb-2">{counterCorrect} / {result?.data.length} correct answers</p>
             <button className="bg-blue-700 text-white py-2 w-full rounded-full">Print certificate</button>
           </div>) : 
           (<div className="failed text-center">
             <h2 className='text-2xl font-bold text-red-700'>Failed!</h2>
+            <h1>{store.name}</h1>
               <h3 className='text-4xl mb-3'>
-                <span className='text-xl'>Your score is</span> <br /> {Math.round((counterCorrect / questions.length) * 100)}%
+                <span className='text-xl'>Your score is</span> <br /> {Math.round((counterCorrect / result?.data.length) * 100)}%
                 </h3>
-              <p className="mb-2">{counterCorrect} / {questions.length} correct answers</p>
+              <p className="mb-2">{counterCorrect} / {result?.data.length} correct answers</p>
               <button className="bg-red-700 text-white py-2 w-full rounded-full" onClick={handleRetake}>Retake Quiz</button>
             </div>)}
 
@@ -83,10 +103,10 @@ const Quiz = () => {
         </div>
         ) : (
         <div className="quiz">
-            <small className='text-center block '>{currentQuestion + 1}/{questions.length} Question</small>
-            <h4 className='font-bold text-lg text-center mb-5'> {randomize.length > 0 && randomize[currentQuestion].question_question}</h4>
+            <small className='text-center block '>{currentQuestion + 1}/{result?.data.length} Question</small>
+            <h4 className='font-bold text-lg text-center mb-5'> {result?.data.length > 0 && result?.data[currentQuestion].question_title}</h4>
 
-               {randomize.length > 0 && randomize[currentQuestion].choices.map((item, key) => (
+               {result?.data.length > 0 && JSON.parse(result?.data[currentQuestion].question_choices).map((item, key) => (
                 <button className={`block mb-2 py-2 bg-gray-600 text-white w-full rounded-full ${key === isActive ? "!bg-blue-800" : ""}`} key={key} 
                 onClick={() => handleSetActiveChoice(key, item)}>{item.choice}</button>
               ))}

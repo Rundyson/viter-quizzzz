@@ -11,12 +11,12 @@ import ModalAddQuestion from './ModalAddQuestion'
 import ToastSuccess from '../partials/ToastSuccess'
 import ModalError from '../partials/modals/ModalError'
 import ModalValidation from '../partials/modals/ModalValidation'
+import QuestionTable from './QuestionTable'
 
 
 const  Question = () => {
     const {dispatch, store} = React.useContext(StoreContext);
     const [itemEdit, setItemEdit] = React.useState(null);
-
     const handleAdd = () => {
       dispatch(setIsAdd(true));
       setItemEdit(null);
@@ -35,7 +35,7 @@ const  Question = () => {
                           <Plus size={16}/> Add New
                         </button>
                       </div>
-                      <Table setItemEdit={setItemEdit}/>
+                      <QuestionTable setItemEdit={setItemEdit}/>
                     </div>
                     <Footer/>
                 </main>
@@ -43,7 +43,7 @@ const  Question = () => {
         </section>
         {store.validate && <ModalValidation/>}
         {store.error && <ModalError/>}
-      {store.success && <ToastSuccess/>}
+        {store.success && <ToastSuccess/>}
         {/* <SpinnerWindow/> */}
         {store.isAdd && <ModalAddQuestion itemEdit={itemEdit}/>}
     </>
